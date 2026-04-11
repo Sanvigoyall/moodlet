@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito:wght@400;600;700;800&display=swap');
+
+/* ── Root ── */
+.journal-root {
+  min-height: 100vh;
+  background: #f0f2fa;
+  font-family: 'Nunito', sans-serif;
+  padding: 80px 20px 80px;
+  position: relative;
+}
+
+/* ── Back button ── */
+.journal-back {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 40px;
+  transition: 0.2s;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.journal-back:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: #7c6fcf;
+}
+
+/* ── Main card ── */
+.journal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 48px 48px 40px;
+  max-width: 680px;
+  margin: 0 auto 28px;
+  box-shadow: 0 4px 32px rgba(100, 90, 160, 0.08);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Mood select ── */
+.journal-select {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #ffffff;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.journal-select:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.journal-select.mood-error {
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-6px);
+  }
+
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+/* ── Mood error message ── */
+.mood-error-msg {
+  font-size: 0.82rem;
+  color: #f87171;
+  font-weight: 700;
+  margin: 0 0 12px 4px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Textarea ── */
+.journal-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 16px 18px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.journal-textarea::placeholder {
+  color: #d1d5db;
+}
+
+.journal-textarea:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+/* ── Save button ── */
+.journal-save-btn {
+  width: 100%;
+  padding: 16px;
+  background: #b8a9f0;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.journal-save-btn:hover:not(:disabled) {
+  background: #9370f0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(167, 139, 250, 0.35);
+}
+
+.journal-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.journal-save-btn.saved {
+  background: #34d399;
+}
+
+/* ── Entries ── */
+.journal-entries {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.journal-entry {
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  animation: entryIn 0.35s ease both;
+  position: relative;
+}
+
+@keyframes entryIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.entry-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.entry-mood-label {
+  font-size: 0.88rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.entry-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.entry-date {
+  font-size: 0.78rem;
+  color: rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+}
+
+/* ── Delete button ── */
+.entry-delete {
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.journal-entry:hover .entry-delete {
+  opacity: 1;
+}
+
+.entry-delete:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
+}
+
+.entry-text {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .journal-card {
+    padding: 32px 24px;
+  }
+
+  .entry-delete {
+    opacity: 1;
+  }
+}

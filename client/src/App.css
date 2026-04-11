@@ -1,0 +1,405 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+
+/* --------------------------
+   Global Colors + Variables
+--------------------------- */
+:root {
+  --primary-color: #f7ddd0;        /* blush peach — very soft */
+  --secondary-color: #fdf9f6;      /* almost white cream */
+  --accent-color: #edc9b8;         /* muted rose */
+  --text-primary: #2e2a27;
+  --text-secondary: #6b625c;
+  --white: #ffffff;
+}
+
+
+/* --------------------------
+   Landing Page Base
+--------------------------- */
+.landing-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fdf9f6 0%, #fef2ec 50%, #fdf6f2 100%);
+  font-family: 'Lora', serif;
+  color: var(--text-primary);
+}
+
+/* --------------------------
+   HERO SECTION
+--------------------------- */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10%;
+  background: linear-gradient(135deg, #fdf9f6 0%, #fef2ec 50%, #fdf6f2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft paper texture overlay */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+}
+
+/* --------------------------
+   GRID LAYOUT
+--------------------------- */
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------
+   TEXT STYLING
+--------------------------- */
+.hero-text {
+  color: var(--text-primary);
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-primary);
+}
+
+.moodlet-logo {
+  font-size: 3.2rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.hero-tagline {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 18px;
+  color: var(--text-secondary);
+}
+
+.hero-description {
+  font-size: 1.15rem;
+  line-height: 1.9;
+  margin-bottom: 40px;
+  max-width: 500px;
+  color: var(--text-secondary);
+}
+
+/* --------------------------
+   BUTTONS
+--------------------------- */
+.hero-buttons{
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 30px;
+}
+.hero-content{
+  position: relative;
+}
+
+.about-buttons{
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  gap: 16px;
+}
+
+.btn-large {
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 40px;
+  transition: 0.3s ease;
+}
+
+/* Primary button: soft beige + shadow */
+.btn-primary {
+  background: var(--primary-color);
+  color: var(--text-primary);
+  border: none;
+  box-shadow: 0px 8px 20px rgba(0,0,0,0.08);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 12px 28px rgba(0,0,0,0.12);
+}
+
+/* Secondary: Glassy white */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.4);
+  color: var(--text-primary);
+  border: 2px solid rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.55);
+  transform: translateY(-3px);
+}
+.btn-link {
+  text-decoration: none;
+}
+
+/* --------------------------
+   EMOJI FLOATING VISUALS
+--------------------------- */
+.hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mood-circles {
+  position: relative;
+  width: 380px;
+  height: 380px;
+}
+
+.mood-circle {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  animation: float-circle 4s ease-in-out infinite;
+}
+
+.mood-circle:nth-child(1) {
+  top: 20%;
+  left: 20%;
+}
+
+.mood-circle:nth-child(2) {
+  top: 60%;
+  left: 8%;
+  animation-delay: 1s;
+}
+
+.mood-circle:nth-child(3) {
+  top: 30%;
+  right: 12%;
+  animation-delay: 2s;
+}
+
+.mood-circle:nth-child(4) {
+  bottom: 18%;
+  right: 20%;
+  animation-delay: 3s;
+}
+
+@keyframes float-circle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(6deg); }
+}
+
+/* --------------------------
+   MOBILE RESPONSIVE
+--------------------------- */
+@media (max-width: 768px) {
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+    justify-content: center;
+  }
+
+  .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .mood-circles {
+    width: 300px;
+    height: 300px;
+  }
+
+  .mood-circle {
+    width: 65px;
+    height: 65px;
+    font-size: 2rem;
+  }
+}
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #f4fff8, #e8f8f1);
+  font-family: "Poppins", sans-serif;
+}
+.auth-card {
+  background: white;
+  padding: 50px 40px;
+  border-radius: 20px;
+  width: 380px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+  text-align: center;
+}
+.auth-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c4a3f;
+}
+
+.auth-subtitle {
+  margin-top: 8px;
+  margin-bottom: 30px;
+  color: #6a7f78;
+}
+.auth-input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  border: 1px solid #dce7e1;
+  font-size: 14px;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #7ec9a7;
+  box-shadow: 0 0 0 2px rgba(126,201,167,0.2);
+}
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #7ec9a7;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.auth-btn:hover {
+  background: #68b897;
+  transform: translateY(-2px);
+}
+.auth-switch {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #6a7f78;
+}
+
+.auth-link {
+  color: #7ec9a7;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* SIGNUP PAGE */
+
+.signup-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #e8f5e9, #f3e5f5);
+  font-family: "Poppins", sans-serif;
+}
+
+.signup-card {
+  width: 350px;
+  padding: 40px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: center;
+}
+
+.signup-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #3a6b55;
+}
+
+.signup-subtitle {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.signup-input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.signup-input:focus {
+  border-color: #7bbfa2;
+  box-shadow: 0 0 0 2px rgba(123,191,162,0.15);
+}
+
+.signup-btn {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #7bbfa2;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.signup-btn:hover {
+  background: #67a88c;
+}
+
+.signup-switch {
+  font-size: 13px;
+  color: #777;
+}
+
+.signup-link {
+  color: #7bbfa2;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
