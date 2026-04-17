@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Mic, Send, User, Bot, Leaf } from 'lucide-react';
-import Vapi from '@vapi-ai/web';
+import { Mic, MicOff, Send, User, Bot, Leaf, Volume2, VolumeX } from 'lucide-react';
 import './MoodyChat.css';
-
-const vapi = new Vapi('90705508-96a6-4094-8273-6cca2376cb55');
 
 const MoodyChat = () => {
   const [messages, setMessages] = useState([
@@ -18,8 +15,14 @@ const MoodyChat = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
-  const [isVapiActive, setIsVapiActive] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(() => {
+    const stored = localStorage.getItem('moody_speech_enabled');
+    return stored === null ? true : stored === 'true';
+  });
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,89 +32,166 @@ const MoodyChat = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  useEffect(() => {
-    vapi.on('message', (msg) => {
-      if (msg.type !== 'transcript' || msg.transcriptType !== 'final') return;
-
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.text === msg.transcript) return prev;
-        return [...prev, {
-          id: Date.now(),
-          sender: msg.role === 'user' ? 'user' : 'bot',
-          text: msg.transcript,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }];
-      });
+  // Toggle speech on/off
+  const toggleSpeech = useCallback(() => {
+    setIsSpeechEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem('moody_speech_enabled', String(next));
+      if (!next) {
+        window.speechSynthesis?.cancel();
+        setIsSpeaking(false);
+      }
+      return next;
     });
-
-    vapi.on('call-end', () => {
-      setIsVapiActive(false);
-    });
-
-    return () => {
-      vapi.removeAllListeners();
-    };
   }, []);
 
-  const handleSend = async (e) => {
-    e?.preventDefault();
-    if (!input.trim()) return;
+  // Speak a text response aloud using browser TTS
+  const speakText = useCallback((text) => {
+    if (!window.speechSynthesis || !isSpeechEnabled) return;
+    window.speechSynthesis.cancel();
 
-    const newMsg = {
-      id: Date.now(),
-      sender: 'user',
-      text: input,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const doSpeak = (voices) => {
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      // Calm & soothing voice settings
+      utterance.rate   = 0.78;   // slow, unhurried
+      utterance.pitch  = 0.88;   // soft, slightly lower
+      utterance.volume = 0.95;
+
+      // Lock to one specific calm female voice.
+      // We look for 'Samantha' (macOS) or 'Google UK English Female' (Chrome)
+      const targetVoice =
+        voices.find((v) => v.name === 'Samantha') ||
+        voices.find((v) => v.name === 'Google UK English Female') ||
+        voices.find((v) => v.name.toLowerCase().includes('female')) ||
+        voices.find((v) => v.lang.startsWith('en'));
+
+      if (targetVoice) utterance.voice = targetVoice;
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend   = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
     };
 
-    setMessages((prev) => [...prev, newMsg]);
-    setInput('');
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      doSpeak(voices);
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => {
+        doSpeak(window.speechSynthesis.getVoices());
+      };
+    }
+  }, [isSpeechEnabled]);
+
+  // Send a message to Groq backend and get a reply
+  const sendToGroq = useCallback(async (text) => {
+    if (!text.trim()) return;
+
+    const userMsg = {
+      id: Date.now(),
+      sender: 'user',
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
     try {
       const response = await fetch('http://localhost:5001/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, mood: selectedMood })
+        body: JSON.stringify({ message: text, mood: selectedMood })
       });
       const data = await response.json();
       setIsTyping(false);
+
+      const replyText = response.ok
+        ? data.reply
+        : (data.message || 'Sorry, something went wrong. Please try again. 🌿');
+
       setMessages((prev) => [...prev, {
         id: Date.now() + 1,
         sender: 'bot',
-        text: data.reply,
+        text: replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
+
+      // Speak the reply aloud
+      speakText(replyText);
+
     } catch (error) {
       console.error('Error fetching from /api/chat:', error);
       setIsTyping(false);
+      const errText = "Couldn't reach the server. Please check your connection and try again. 🌿";
+      setMessages((prev) => [...prev, {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: errText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      speakText(errText);
     }
+  }, [selectedMood, speakText]);
+
+  // Handle text input send
+  const handleSend = async (e) => {
+    e?.preventDefault();
+    if (!input.trim()) return;
+    const msg = input;
+    setInput('');
+    await sendToGroq(msg);
   };
 
-  const handleVapiToggle = async () => {
-    if (isVapiActive) {
-      vapi.stop();
-      setIsVapiActive(false);
-    } else {
-      setIsVapiActive(true);
-      await vapi.start({
-        transcriber: {
-          provider: 'deepgram',
-          model: 'nova-2',
-          language: 'en-US',
-        },
-        model: {
-          provider: 'openai',
-          model: 'gpt-3.5-turbo',
-          systemPrompt: `You are Moody 🌿, a calm emotional support chatbot. Reply in a warm, friendly tone. Keep responses concise.`,
-        },
-        voice: {
-          provider: 'playht',
-          voiceId: 'jennifer',
-        },
-      });
+  // Toggle voice input using Web Speech API
+  const handleVoiceToggle = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert('Your browser does not support voice input. Please use Google Chrome.');
+      return;
     }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    // Stop any ongoing speech before listening
+    window.speechSynthesis?.cancel();
+    setIsSpeaking(false);
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => setIsListening(true);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setIsListening(false);
+      sendToGroq(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      if (event.error !== 'no-speech') {
+        setMessages((prev) => [...prev, {
+          id: Date.now(),
+          sender: 'bot',
+          text: `Voice error: ${event.error}. Please try again. 🌿`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }]);
+      }
+    };
+
+    recognition.onend = () => setIsListening(false);
+    recognition.start();
   };
 
   return (
@@ -134,8 +214,25 @@ const MoodyChat = () => {
 
       <main className="moody-main">
         <div className="moody-header">
-          <h1>Moody Assistant</h1>
-          <p>{isVapiActive ? '🎙️ Listening...' : 'A safe, non-judgmental space.'}</p>
+          <div className="moody-header-top">
+            <h1>Moody Assistant</h1>
+            <button
+              className={`speech-toggle-btn ${isSpeechEnabled ? 'enabled' : 'disabled'}`}
+              onClick={toggleSpeech}
+              title={isSpeechEnabled ? 'Mute Moody voice' : 'Unmute Moody voice'}
+              aria-label={isSpeechEnabled ? 'Mute voice' : 'Unmute voice'}
+            >
+              {isSpeechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              <span>{isSpeechEnabled ? 'Voice ON' : 'Voice OFF'}</span>
+            </button>
+          </div>
+          <p>
+            {isListening
+              ? '🎙️ Listening...'
+              : isSpeaking
+              ? '🔊 Speaking...'
+              : 'A safe, non-judgmental space.'}
+          </p>
         </div>
 
         <div className="mood-selector">
@@ -177,11 +274,12 @@ const MoodyChat = () => {
           <div className="chat-input-area">
             <div className="vapi-placeholder" title="Talk to Moody">
               <button
-                className={`mic-btn ${isVapiActive ? 'active' : ''}`}
-                onClick={handleVapiToggle}
+                className={`mic-btn ${isListening ? 'active' : ''}`}
+                onClick={handleVoiceToggle}
                 type="button"
+                aria-label={isListening ? 'Stop listening' : 'Start voice input'}
               >
-                <Mic size={20} />
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
             </div>
 
@@ -189,12 +287,12 @@ const MoodyChat = () => {
               <input
                 type="text"
                 className="chat-input"
-                placeholder={isVapiActive ? 'Voice mode active...' : 'Type your message here...'}
+                placeholder={isListening ? 'Listening...' : 'Type your message here...'}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                disabled={isVapiActive}
+                disabled={isListening}
               />
-              <button type="submit" className="send-btn" disabled={!input.trim() || isVapiActive}>
+              <button type="submit" className="send-btn" disabled={!input.trim() || isListening}>
                 <Send size={18} />
               </button>
             </form>

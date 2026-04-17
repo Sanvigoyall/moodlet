@@ -1,25 +1,50 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, mood } = req.body;
 
-    // Initialize inside the handler so it reads the key at request time
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({
+        message: 'Groq API key is not configured. Please set GROQ_API_KEY in your .env file.'
+      });
+    }
 
-    const result = await model.generateContent(`
-You are Moody 🌿, a calm emotional support chatbot.
-User: ${message}
-Reply in a warm, friendly tone.
-`);
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-    res.json({ reply: result.response.text() });
+    const moodContext = mood ? `The user's current mood is ${mood}. ` : '';
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `You are Moody 🌿, a calm emotional support chatbot. ${moodContext}Reply in a warm, friendly tone. Keep responses concise and supportive.`
+        },
+        {
+          role: 'user',
+          content: message
+        }
+      ],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 512,
+    });
+
+    const reply = chatCompletion.choices[0]?.message?.content || "I'm here for you. Could you tell me more? 🌿";
+    res.json({ reply });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Chat error' });
+    console.error('Chat route error:', error?.message || error);
+
+    if (error?.status === 429) {
+      return res.status(429).json({
+        message: "I'm getting too many requests right now. Please wait a moment and try again. 🌿"
+      });
+    }
+
+    res.status(500).json({ message: 'Something went wrong while talking to Moody. Please try again later.' });
   }
 });
 
