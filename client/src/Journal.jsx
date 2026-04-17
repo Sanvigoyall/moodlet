@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Journal.css";
 
@@ -31,13 +31,7 @@ function Journal() {
   const token = localStorage.getItem("token");
   const userName = JSON.parse(localStorage.getItem("user"))?.name || "you";
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) { navigate("/auth"); return; }
-    fetchEntries();
-  }, [navigate]);
-
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     try {
       const res = await fetch(API, {
         headers: { Authorization: `Bearer ${token}` },
@@ -49,7 +43,13 @@ function Journal() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) { navigate("/auth"); return; }
+    fetchEntries();
+  }, [navigate, fetchEntries]);
 
   const getMoodData = (val) => MOODS.find((m) => m.value === val) || MOODS[0];
 
