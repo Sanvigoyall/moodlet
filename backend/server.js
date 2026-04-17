@@ -1,6 +1,5 @@
 const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/.env' });
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -32,15 +31,16 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-const PORT = process.env.PORT || 5001;
+// ✅ Connect to MongoDB (without blocking export)
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err.message));
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1);
-  });
+// ✅ Local dev server
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5001;
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+}
+
+// ✅ Required for Vercel
+module.exports = app;
