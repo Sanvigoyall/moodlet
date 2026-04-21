@@ -403,3 +403,114 @@
 .signup-link:hover {
   text-decoration: underline;
 }
+
+/* ── Dark Mode ── */
+body.dark {
+  --bg-primary: #0f0f13;
+  --bg-secondary: #1a1a24;
+  --bg-card: #1e1e2e;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255,255,255,0.08);
+}
+
+body.dark .dash-root {
+  background: linear-gradient(135deg, #0f0f13 0%, #13111e 40%, #0d1117 100%);
+}
+
+body.dark .orb-1 { background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%); }
+body.dark .orb-2 { background: radial-gradient(circle, rgba(99,102,241,0.12), transparent 70%); }
+body.dark .orb-3 { background: radial-gradient(circle, rgba(168,85,247,0.1), transparent 70%); }
+body.dark .orb-4 { background: radial-gradient(circle, rgba(59,130,246,0.1), transparent 70%); }
+
+body.dark .dash-header { border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+body.dark .dash-logout {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+  color: #c084fc;
+}
+
+body.dark .dash-greet-sub { color: #64748b; }
+
+body.dark .dash-card {
+  border-color: rgba(255,255,255,0.06);
+}
+
+body.dark .card-journal {
+  background: linear-gradient(145deg, rgba(30,20,10,0.95), rgba(40,25,10,0.9));
+}
+
+body.dark .card-moody {
+  background: linear-gradient(145deg, rgba(20,15,35,0.95), rgba(25,18,45,0.9));
+}
+
+body.dark .card-title { color: #e2e8f0; }
+body.dark .card-moody .card-title { color: #c4b5fd; }
+body.dark .card-sub { color: #64748b; }
+
+body.dark .mood-pill {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+  color: #94a3b8;
+}
+
+body.dark .mood-pill:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+body.dark .mood-pill.selected {
+  background: linear-gradient(135deg, rgba(244,114,182,0.2), rgba(167,139,250,0.2));
+  border-color: rgba(244,114,182,0.3);
+  color: #f472b6;
+}
+
+/* Dark mode for auth pages */
+body.dark .auth-page,
+body.dark .signup-page {
+  background: linear-gradient(120deg, #0f0f13, #13111e);
+}
+
+body.dark .auth-card,
+body.dark .signup-card {
+  background: #1e1e2e;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.4);
+}
+
+body.dark .auth-title,
+body.dark .signup-title { color: #e2e8f0; }
+body.dark .auth-subtitle,
+body.dark .signup-subtitle { color: #64748b; }
+
+body.dark .auth-input,
+body.dark .signup-input {
+  background: #2a2a3e;
+  border-color: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+
+/* Dark mode for journal */
+body.dark .journal-root {
+  background: linear-gradient(135deg, #0f0f13, #13111e);
+}
+
+body.dark .journal-card {
+  background: #1e1e2e;
+  border-color: rgba(255,255,255,0.06);
+}
+
+body.dark .journal-textarea {
+  background: #2a2a3e;
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,0.1);
+}
+
+body.dark .journal-select {
+  background: #2a2a3e;
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,0.1);
+}
+
+body.dark .journal-entry {
+  filter: brightness(0.85);
+}

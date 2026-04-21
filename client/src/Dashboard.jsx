@@ -1,21 +1,60 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "./DarkModeContext";
 import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { darkMode, setDarkMode } = useDarkMode();
   const [user, setUser] = useState(null);
   const [greeting, setGreeting] = useState("");
   const [selectedMood, setSelectedMood] = useState(null);
+  const [streak, setStreak] = useState(0);
+  const [streakMessage, setStreakMessage] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (!stored) { navigate("/auth"); return; }
     setUser(JSON.parse(stored));
+
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("good morning,");
     else if (hour < 17) setGreeting("good afternoon,");
     else setGreeting("good evening,");
+
+    // ── Streak logic ──
+    const today = new Date().toDateString();
+    const lastVisit = localStorage.getItem("lastVisit");
+    const currentStreak = parseInt(localStorage.getItem("streak") || "0");
+
+    if (lastVisit === today) {
+      // Already visited today, just load streak
+      setStreak(currentStreak);
+    } else {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (lastVisit === yesterday.toDateString()) {
+        // Visited yesterday → extend streak
+        const newStreak = currentStreak + 1;
+        localStorage.setItem("streak", newStreak);
+        localStorage.setItem("lastVisit", today);
+        setStreak(newStreak);
+      } else {
+        // Streak broken
+        localStorage.setItem("streak", 1);
+        localStorage.setItem("lastVisit", today);
+        setStreak(1);
+      }
+    }
+
+    // Streak message
+    const s = parseInt(localStorage.getItem("streak") || "1");
+    if (s >= 30) setStreakMessage("legendary! 🏆");
+    else if (s >= 14) setStreakMessage("on fire! 🔥");
+    else if (s >= 7) setStreakMessage("amazing! ⚡");
+    else if (s >= 3) setStreakMessage("keep going! 💪");
+    else setStreakMessage("just started! 🌱");
+
   }, [navigate]);
 
   const handleLogout = () => {
@@ -40,7 +79,17 @@ function Dashboard() {
 
       <header className="dash-header">
         <div className="dash-logo">🌿 moodlet</div>
-        <button className="dash-logout" onClick={handleLogout}>sign out</button>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            className="dash-logout"
+            onClick={() => setDarkMode(!darkMode)}
+            style={{ fontSize: "1.1rem", padding: "8px 14px" }}
+            title="Toggle dark mode"
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+          <button className="dash-logout" onClick={handleLogout}>sign out</button>
+        </div>
       </header>
 
       <main className="dash-main">
@@ -48,6 +97,25 @@ function Dashboard() {
           <span className="dash-greet-text">{greeting}</span>
           <span className="dash-greet-name">{firstName} ✨</span>
           <p className="dash-greet-sub">how are you feeling today?</p>
+        </div>
+
+        {/* ── Streak Banner ── */}
+        <div className="streak-banner">
+          <div className="streak-left">
+            <span className="streak-fire">🔥</span>
+            <div>
+              <p className="streak-count">{streak} day streak</p>
+              <p className="streak-msg">{streakMessage}</p>
+            </div>
+          </div>
+          <div className="streak-dots">
+            {[...Array(7)].map((_, i) => (
+              <div
+                key={i}
+                className={`streak-dot ${i < Math.min(streak, 7) ? "active" : ""}`}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="dash-cards">
